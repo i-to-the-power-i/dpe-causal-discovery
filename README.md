@@ -11,6 +11,44 @@ This implements a causal inference framework designed to extract binary patterns
 
 ---
 
+## Getting Started
+
+You can set up the project using one of the two methods below:
+
+1. **Clone via Terminal:**
+   `git clone https://github.com/i-to-the-power-i/dpe-causal-discovery.git`
+    This method requires manual structuring of the files and folders according to the `Project Structure`.
+   
+3. **Download Manual Bundle:**
+   [Download DPE.zip from Google Drive](https://drive.google.com/file/d/1-HfHr1tWR3A9-pT3lZ85Rf5eJzThILQr/view?usp=sharing)
+   The `DPE.zip` folder contains all the files, datasets and documentation in `Project Structure` (**Most Preferred**).
+
+---
+
+## Project Structure
+
+```text
+DPE/
+├──causal-method-1/
+    ├── pyproject.toml         # Build system & CLI metadata
+    ├── setup.py               # Cython compilation script
+    ├── requirements.txt       # Project dependencies
+    ├── README.md              # Documentation
+    └── src/
+        └── model/             # Core Package
+            ├── __init__.py    # Package initializer
+            ├── main.py        # CLI Entry point logic
+            ├── cy_utils.pyx   # Computational kernels
+            └── utils.pyx      # Visuals and Inference logic
+            └── demo.py
+    └── results/               # Automatically generated .png output
+└──experiments/            # Experiments
+        └── ETCPy/             # ETCPy package fork from CCMs
+        └── results/
+
+```
+---
+
 ## Installation & Setup
 
 ### 1. Prerequisites
@@ -84,32 +122,6 @@ Shows the  ratio Rflip​ for every extracted pattern.
 A radial graph where Y is the center.
 
 * **Aesthetics**: Closer nodes represent stronger causal influence.
-
----
-
-## Project Structure
-
-```text
-DPE/
-├──causal-method-1/
-    ├── pyproject.toml         # Build system & CLI metadata
-    ├── setup.py               # Cython compilation script
-    ├── requirements.txt       # Project dependencies
-    ├── README.md              # Documentation
-    └── src/
-        └── model/             # Core Package
-            ├── __init__.py    # Package initializer
-            ├── main.py        # CLI Entry point logic
-            ├── cy_utils.pyx   # Computational kernels
-            └── utils.pyx      # Visuals and Inference logic
-            └── demo.py
-    └── results/               # Automatically generated .png output
-└──experiments/            # Experiments
-        └── ETCPy/             # ETCPy package fork from CCMs
-        └── results/
-
-
-```
 
 ---
 
