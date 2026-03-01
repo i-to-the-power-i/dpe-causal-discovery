@@ -1,0 +1,336 @@
+# # ===================================================
+# # Sum of weighted entropy
+# # ===================================================
+# # weighted entropy sum.
+# # Rflip
+# def weighted_binary_entropy(ratio, count, seq_len, pattern_len):
+#     """
+#     Calculates the binary entropy of a pattern weighted by its frequency.
+    
+#     Args:
+#         ratio (float): The success probability (R_flip).
+#         count (int): Total occurrences of this pattern (change + no change).
+#         seq_len (int): Total length of the sequence.
+#         pattern_len (int): The length of the specific pattern.
+        
+#     Returns:
+#         float: The frequency-weighted entropy in bits.
+#     """
+#     cdef float entropy, weight, total_windows
+    
+#     # 1. Calculate standard binary entropy Hb(r)
+#     if ratio <= 0.0 or ratio >= 1.0:
+#         entropy = 0.0
+#     else:
+#         # Use np.log2 for compatibility, Cython handles this well
+#         entropy = -(ratio * np.log2(ratio) + (1.0 - ratio) * np.log2(1.0 - ratio))
+    
+#     # 2. Calculate weight: Occurrences / Total possible windows
+#     total_windows = (seq_len - pattern_len + 1)
+    
+#     if total_windows <= 0:
+#         return 0.0
+        
+#     weight = count / total_windows
+    
+#     # 3. Return weighted entropy
+#     # print(f'Ratio:{ratio}, Entropy:{weight * entropy}')
+#     return weight * entropy
+
+# def sum_weighted_entropy(stats, seq_len):
+#     """
+#     Computes the mean weighted binary entropy across a pattern dictionary.
+    
+#     Args:
+#         stats (pd.DataFrame): DataFrame with columns ['Pattern', 'Ratio', 'Count'].
+#             'Count' should be the total occurrences of that pattern.
+#         seq_len (int): The length of the original sequence used.
+
+#     Returns:
+#         float: The arithmetic sum of the weighted entropy values.
+#     """
+#     if stats is None or stats.empty:
+#         return 0.0
+    
+#     weighted_entropies = stats.apply(
+#         lambda row: weighted_binary_entropy(
+#             row['Ratio'], 
+#             (row['Change'] + row['No-change']), 
+#             seq_len, 
+#             len(str(row.name).strip())
+#         ), 
+#         axis=1
+#     )
+#     # print(f'Average weighted entropy: {weighted_entropies.mean()}')
+#     return weighted_entropies.sum()
+
+# def identify_causality(stats_x_y, stats_y_x, X, Y):
+#     '''
+#     Infers the causal direction by comparing the average entropy of 
+#     pattern-response relationships.
+    
+#     The method follows the principle of Minimum Uncertainty: the direction 
+#     with the lower average weighted entropy is identified as the causal path, 
+#     as it indicates a more deterministic relationship between the 
+#     sequences. If the average weighted entropies are equal, the sequences are 
+#     considered independent or the direction is inconclusive.
+
+#     Args:
+#         stats_x_y (pd.DataFrame): Pattern statistics for the X -> Y direction.
+#         stats_y_x (pd.DataFrame): Pattern statistics for the Y -> X direction.
+
+#     Returns:
+#         str: Inferred direction ('X -> Y', 'Y -> X', 'Independence', or 'Undetermined).
+#         float: Causal strength.
+#     '''
+#     cdef float avg_h_xy, avg_h_yx
+    
+#     avg_h_xy = average_weighted_entropy(stats_x_y, len(X))
+#     avg_h_yx = average_weighted_entropy(stats_y_x, len(Y))
+    
+#     if avg_h_xy < avg_h_yx:
+#         return 'X -> Y', avg_h_xy, avg_h_yx
+#     elif avg_h_yx < avg_h_xy:
+#         return 'Y -> X', avg_h_xy, avg_h_yx
+#     elif avg_h_xy > 0.42 and avg_h_yx > 0.42:
+#         return 'Independence', avg_h_xy, avg_h_yx
+    
+#     return 'Undetermined', avg_h_xy, avg_h_yx
+
+# def identify_causality(stats_x_y, stats_y_x, X, Y):
+#     '''
+#     Infers the causal direction by comparing the average entropy of 
+#     pattern-response relationships.
+    
+#     The method follows the principle of Minimum Uncertainty: the direction 
+#     with the lower average weighted entropy is identified as the causal path, 
+#     as it indicates a more deterministic relationship between the 
+#     sequences. If the average weighted entropies are equal, the sequences are 
+#     considered independent or the direction is inconclusive.
+
+#     Args:
+#         stats_x_y (pd.DataFrame): Pattern statistics for the X -> Y direction.
+#         stats_y_x (pd.DataFrame): Pattern statistics for the Y -> X direction.
+
+#     Returns:
+#         str: Inferred direction ('X -> Y', 'Y -> X', 'Independence', or 'Undetermined).
+#         float: Causal strength.
+#     '''
+#     cdef float avg_h_xy, avg_h_yx
+    
+#     avg_h_xy = sum_weighted_entropy(stats_x_y, len(X))
+#     avg_h_yx = sum_weighted_entropy(stats_y_x, len(Y))
+    
+#     if avg_h_xy < avg_h_yx:
+#         return 'X -> Y', avg_h_xy, avg_h_yx
+#     elif avg_h_yx < avg_h_xy:
+#         return 'Y -> X', avg_h_xy, avg_h_yx
+#     elif avg_h_xy == avg_h_yx:
+#         return 'Independence', avg_h_xy, avg_h_yx
+    
+#     return 'Undetermined', avg_h_xy, avg_h_yx
+# # ===================================================
+
+# # # ===================================================
+# # # Sum of weighted entropy
+# # # ===================================================
+# # weighted entropy sum.
+# # Wp
+# def calculate_entropy_of_weight_times_ratio(ratio, count, seq_len, pattern_len):
+#     """
+#     Calculates the binary entropy of the weight (frequency) 
+#     and multiplies it by the ratio.
+#     """
+#     # 1. Calculate the weight (W)
+#     total_windows = (seq_len - pattern_len + 1)
+#     if total_windows <= 0:
+#         return 0.0
+    
+#     weight = count / total_windows
+    
+#     # 2. Calculate the standard binary entropy of the weight: Hb(W)
+#     # Clamp weight to [0, 1] to avoid log errors
+#     if weight <= 0.0 or weight >= 1.0:
+#         entropy_w = 0.0
+#     else:
+#         entropy_w = -(weight * np.log2(weight) + (1.0 - weight) * np.log2(1.0 - weight))
+    
+#     # 3. Multiply the entropy of weight by the ratio
+#     return entropy_w * ratio
+
+# def sum_weighted_entropy(stats, seq_len):
+#     """
+#     Computes the mean weighted binary entropy across a pattern dictionary.
+    
+#     Args:
+#         stats (pd.DataFrame): DataFrame with columns ['Pattern', 'Ratio', 'Count'].
+#             'Count' should be the total occurrences of that pattern.
+#         seq_len (int): The length of the original sequence used.
+
+#     Returns:
+#         float: The arithmetic sum of the weighted entropy values.
+#     """
+#     if stats is None or stats.empty:
+#         return 0.0
+    
+#     weighted_entropies = stats.apply(
+#         lambda row: calculate_entropy_of_weight_times_ratio(
+#             row['Ratio'], 
+#             (row['Change'] + row['No-change']), 
+#             seq_len, 
+#             len(str(row.name).strip())
+#         ), 
+#         axis=1
+#     )
+#     # print(f'Average weighted entropy: {weighted_entropies.mean()}')
+#     return weighted_entropies.sum()
+
+# def identify_causality(stats_x_y, stats_y_x, X, Y):
+#     '''
+#     Infers the causal direction by comparing the average entropy of 
+#     pattern-response relationships.
+    
+#     The method follows the principle of Minimum Uncertainty: the direction 
+#     with the lower average weighted entropy is identified as the causal path, 
+#     as it indicates a more deterministic relationship between the 
+#     sequences. If the average weighted entropies are equal, the sequences are 
+#     considered independent or the direction is inconclusive.
+
+#     Args:
+#         stats_x_y (pd.DataFrame): Pattern statistics for the X -> Y direction.
+#         stats_y_x (pd.DataFrame): Pattern statistics for the Y -> X direction.
+
+#     Returns:
+#         str: Inferred direction ('X -> Y', 'Y -> X', 'Independence', or 'Undetermined).
+#         float: Causal strength.
+#     '''
+#     cdef float avg_h_xy, avg_h_yx
+    
+#     avg_h_xy = sum_weighted_entropy(stats_x_y, len(X))
+#     avg_h_yx = sum_weighted_entropy(stats_y_x, len(Y))
+    
+#     if avg_h_xy < avg_h_yx:
+#         return 'X -> Y', avg_h_xy, avg_h_yx
+#     elif avg_h_yx < avg_h_xy:
+#         return 'Y -> X', avg_h_xy, avg_h_yx
+#     elif avg_h_xy == avg_h_yx:
+#         return 'Independence', avg_h_xy, avg_h_yx
+    
+#     return 'Undetermined', avg_h_xy, avg_h_yx
+
+# def run_causal_analysis(seq_x_bin, seq_y_bin):
+#     """
+#     Executes the full causal discovery pipeline on a single pair of binary sequences.
+    
+#     This Cythonized version uses typed memoryviews/arrays and float precision 
+#     to reduce Python overhead during the pipeline execution.
+#     """
+#     # 1. Efficiently convert float arrays to strings for the logic gate
+#     # We use a join with a list comprehension for the bridge to Python-based logic
+#     cdef str x_str = "".join([str(int(i)) for i in seq_x_bin])
+#     cdef str y_str = "".join([str(int(i)) for i in seq_y_bin])
+    
+#     # 2. Calculate Causal History
+#     # Assuming these functions are defined as 'def' or 'cpdef' in your cy_utils
+#     Gx_y = calculate_causal_history(y_str, x_str)
+#     Gy_x = calculate_causal_history(x_str, y_str)
+    
+#     # 3. Generate Pattern Dictionaries
+#     Px_y = generate_pattern_dictionary(Gx_y)
+#     Py_x = generate_pattern_dictionary(Gy_x)
+    
+#     # 4. Contribution Analysis
+#     # We pass the strings and the dictionaries to the analysis functions
+#     stats1 = calculate_contribution_analysis(Px_y, x_str, y_str)
+#     stats2 = calculate_contribution_analysis(Py_x, y_str, x_str)
+    
+#     # 5. Final Verdict
+#     # Returns the final directionality verdict
+#     return identify_causality(stats1, stats2, x_str, y_str)
+# # # ===================================================
+
+# # ===================================================
+# # Mean of weighted entropy with Wp
+# # ===================================================
+# # weighted entropy mean.
+# def calculate_entropy_of_weight_times_ratio(ratio, count, seq_len, pattern_len):
+#     """
+#     Calculates the binary entropy of the weight (frequency) 
+#     and multiplies it by the ratio.
+#     """
+#     # 1. Calculate the weight (W)
+#     total_windows = (seq_len - pattern_len + 1)
+#     if total_windows <= 0:
+#         return 0.0
+    
+#     weight = count / total_windows
+    
+#     # 2. Calculate the standard binary entropy of the weight: Hb(W)
+#     # Clamp weight to [0, 1] to avoid log errors
+#     if weight <= 0.0 or weight >= 1.0:
+#         entropy_w = 0.0
+#     else:
+#         entropy_w = -(weight * np.log2(weight) + (1.0 - weight) * np.log2(1.0 - weight))
+    
+#     # 3. Multiply the entropy of weight by the ratio
+#     return entropy_w * ratio
+
+# def avg_weighted_entropy(stats, seq_len):
+#     """
+#     Computes the mean weighted binary entropy across a pattern dictionary.
+    
+#     Args:
+#         stats (pd.DataFrame): DataFrame with columns ['Pattern', 'Ratio', 'Count'].
+#             'Count' should be the total occurrences of that pattern.
+#         seq_len (int): The length of the original sequence used.
+
+#     Returns:
+#         float: The arithmetic sum of the weighted entropy values.
+#     """
+#     if stats is None or stats.empty:
+#         return 0.0
+    
+#     weighted_entropies = stats.apply(
+#         lambda row: calculate_entropy_of_weight_times_ratio(
+#             row['Ratio'], 
+#             (row['Change'] + row['No-change']), 
+#             seq_len, 
+#             len(str(row.name).strip())
+#         ), 
+#         axis=1
+#     )
+#     # print(f'Average weighted entropy: {weighted_entropies.mean()}')
+#     return weighted_entropies.mean()
+
+# def identify_causality(stats_x_y, stats_y_x, X, Y):
+#     '''
+#     Infers the causal direction by comparing the average entropy of 
+#     pattern-response relationships.
+    
+#     The method follows the principle of Minimum Uncertainty: the direction 
+#     with the lower average weighted entropy is identified as the causal path, 
+#     as it indicates a more deterministic relationship between the 
+#     sequences. If the average weighted entropies are equal, the sequences are 
+#     considered independent or the direction is inconclusive.
+
+#     Args:
+#         stats_x_y (pd.DataFrame): Pattern statistics for the X -> Y direction.
+#         stats_y_x (pd.DataFrame): Pattern statistics for the Y -> X direction.
+
+#     Returns:
+#         str: Inferred direction ('X -> Y', 'Y -> X', 'Independence', or 'Undetermined).
+#         float: Causal strength.
+#     '''
+#     cdef float avg_h_xy, avg_h_yx
+    
+#     avg_h_xy = avg_weighted_entropy(stats_x_y, len(X))
+#     avg_h_yx = avg_weighted_entropy(stats_y_x, len(Y))
+    
+#     if avg_h_xy < avg_h_yx:
+#         return 'X -> Y', avg_h_xy, avg_h_yx
+#     elif avg_h_yx < avg_h_xy:
+#         return 'Y -> X', avg_h_xy, avg_h_yx
+#     elif avg_h_xy == avg_h_yx:
+#         return 'Independence', avg_h_xy, avg_h_yx
+    
+#     return 'Undetermined', avg_h_xy, avg_h_yx

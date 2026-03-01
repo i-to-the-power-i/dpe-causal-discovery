@@ -1,0 +1,167 @@
+Metadata-Version: 2.4
+Name: causal-history-extraction
+Version: 0.1.0
+Summary: Identification of causal direction between binary sequences using bit-flip dictionaries and XNOR pattern extraction.
+Author-email: Shubham Bhilare <2025proj022@goa.bits-pilani.ac.in>
+Keywords: causality,binary-sequences,pattern-extraction
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: biopython==1.86
+Requires-Dist: causal-history-extraction==0.1.0
+Requires-Dist: contourpy==1.3.3
+Requires-Dist: cycler==0.12.1
+Requires-Dist: Cython==3.2.3
+Requires-Dist: fonttools==4.61.1
+Requires-Dist: kiwisolver==1.4.9
+Requires-Dist: matplotlib==3.10.8
+Requires-Dist: munkres==1.1.4
+Requires-Dist: networkx==3.6.1
+Requires-Dist: numpy==2.4.0
+Requires-Dist: packaging==25.0
+Requires-Dist: pandas==2.3.3
+Requires-Dist: patsy==1.0.2
+Requires-Dist: pillow==12.0.0
+Requires-Dist: pip==25.3
+Requires-Dist: pyparsing==3.2.5
+Requires-Dist: PySide6==6.10.1
+Requires-Dist: python-dateutil==2.9.0.post0
+Requires-Dist: pytz==2025.2
+Requires-Dist: scipy==1.16.3
+Requires-Dist: seaborn==0.13.2
+Requires-Dist: setuptools==80.9.0
+Requires-Dist: shiboken6==6.10.1
+Requires-Dist: six==1.17.0
+Requires-Dist: statsmodels==0.14.6
+Requires-Dist: tornado==6.5.4
+Requires-Dist: tzdata==2025.3
+Requires-Dist: unicodedata2==17.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: black>=23.0; extra == "dev"
+
+# Causal Pattern Analysis & Visualization
+
+This project implements a causal inference framework designed to extract binary patterns from time-series data and quantify their predictive power using the $R_{flip}$ ratio. It includes **Cython-optimized** computational kernels for high-performance analysis and advanced **NetworkX** visualizations.
+
+## Features
+
+* **Causal History Extraction**: Identifies sub-patterns in sequence $X$ that correspond to bit-flips in sequence $Y$.
+* **Cython Optimization**: High-speed pattern matching and contribution analysis.
+* **Aesthetic Network Mapping**: Visualizes causal strength as physical distance (Distance = 10 * (2 - R_flip)).
+* **Automated Reporting**: Generates high-resolution (300 DPI) charts saved automatically to `/results`.
+
+---
+
+## Installation & Setup
+
+### 1. Prerequisites
+Ensure you have a C compiler installed (GCC on Linux/Mac or MSVC on Windows).
+
+
+### 2. Standard Installation (via pyproject.toml)
+From the **root directory** (`causal-method-1/`), install the project in editable mode. This pulls dependencies from `requirements.txt` and registers the `analyze-causality` command:
+
+```bash
+# Navigate to project root
+cd causal-method
+
+# Install project and dependencies
+pip install -e .
+
+```
+
+### 3. Compile Cython Modules
+
+To generate the high-performance binaries, run the build script from the root:
+
+```bash
+python setup.py build_ext --inplace
+
+```
+
+---
+
+## 📖 Usage Guide
+
+### 1. Command Line Interface (Recommended)
+
+After installation, you can run the full analysis pipeline from any directory by simply typing:
+
+```bash
+analyze-causality
+
+```
+
+### 2. Programmatic Usage
+
+If you are importing the modules into your own scripts, use the package-based imports:
+
+```python
+from model.cy_utils import calculate_causal_history, calculate_contribution_analysis
+from model.utils import causality_inference, generate_causal_network
+
+# Input Sequences
+y = "000001000010000000000100001000"
+x = "011101111010011001110101101001"
+
+# Evaluate Direction
+Gx_y = calculate_causal_history(y, x)
+direction = causality_inference(Gx_y, []) # Example
+
+```
+
+---
+
+## Visualizations Explained
+
+### Contribution Analysis (Bar Chart)
+
+Shows the  ratio Rflip​ for every extracted pattern.
+
+* **Y-Axis**: Ratio Score (0.0 to 1.0).
+* **Interpretation**: A score of **1.0** indicates a "Perfect Predictor"—every time this pattern appears in X, a flip occurs in Y.
+
+### Causal Proximity Network (Graph)
+
+A radial graph where Y is the center.
+
+* **Logic**: The distance from a pattern node to Y is 10⋅(2−Rflip​).
+* **Aesthetics**: Closer nodes represent stronger causal influence.
+
+---
+
+## Project Structure
+
+```text
+causal-method-1/
+├── pyproject.toml         # Build system & CLI metadata
+├── setup.py               # Cython compilation script
+├── requirements.txt       # Project dependencies
+├── README.md              # Documentation
+└── src/
+    └── model/             # Core Package
+        ├── __init__.py    # Package initializer
+        ├── main.py        # CLI Entry point logic
+        ├── cy_utils.pyx   # Computational kernels
+        └── utils.pyx      # Visuals and Inference logic
+        └── demo.py
+├── results/               # Automatically generated .png output
+└── experiments/           # Experiments
+    └── ETCPy/             # ETCPy package fork from CCMs
+    └── results/
+
+
+```
+
+---
+
+## Maintenance
+
+To remove build artifacts and intermediate C files:
+
+```bash
+rm -rf build/
+find . -name "*.so" -delete
+find . -name "*.c" -delete
+
+```
