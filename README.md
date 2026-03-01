@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Dictionary Based Pattern Entropy Method for Causal Inference.
 
 This implements a causal inference framework designed to extract binary patterns from time-series data and quantify their predictive power using the $R_{flip}$ ratio. It includes **Cython-optimized** computational kernels for high-performance analysis and advanced **NetworkX** visualizations.
@@ -125,5 +124,3 @@ find . -name "*.c" -delete
 
 ```
 =======
-# DPE
->>>>>>> aa49fd04a0c78411f75edab61d39ece94982ba6d
