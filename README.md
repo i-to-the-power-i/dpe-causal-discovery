@@ -29,18 +29,20 @@ You can set up the project using one of the two methods below:
 
 ```text
 DPE/
-├──causal-method-1/
+├──causal-method/
+    ├── environment.yml        # Conda environment set-up
     ├── pyproject.toml         # Build system & CLI metadata
     ├── setup.py               # Cython compilation script
     ├── requirements.txt       # Project dependencies
     ├── README.md              # Documentation
+    ├── docs/                  # Complete Documentation with examples
     └── src/
         └── model/             # Core Package
             ├── __init__.py    # Package initializer
             ├── main.py        # CLI Entry point logic
             ├── cy_utils.pyx   # Computational kernels
             └── utils.pyx      # Visuals and Inference logic
-            └── demo.py
+            └── demo.py        # Examples and updated network graph
     └── results/               # Automatically generated .png output
 └──experiments/            # Experiments
         └── ETCPy/             # ETCPy package fork from CCMs
