@@ -1,0 +1,22 @@
+[build-system]
+# These are the requirements needed to build the package from source
+requires = ["setuptools>=61.0", "wheel", "Cython>=0.29.30", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ETCPy"
+version = "0.1.0"
+description = "Effortless Theory of Causality for Python"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Pranay S. Yadav"}
+]
+dependencies = [
+    "numpy",
+]
+
+[tool.setuptools]
+# This ensures that the C-extensions and subpackages are found
+packages = ["ETCPy", "ETCPy.ETC", "ETCPy.ETC.CCMC"]
